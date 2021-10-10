@@ -1,5 +1,6 @@
-#ifndef HASHMAP
-#define HASHMAP
+#ifndef HASHMAP_H_
+#define HASHMAP_H_
+
 #include <stddef.h>
 
 typedef struct list_t {
@@ -15,4 +16,7 @@ typedef struct map_t {
     float loadFactor;
 } map_t;
 
+static list_t *createNode(char *, char *);
+static size_t map(void *, size_t, size_t);
+map_t *createMap(size_t);
 #endif
