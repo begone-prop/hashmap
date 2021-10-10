@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "hashmap.h"
 
 map_t *createMap(size_t mapSize) {
@@ -32,4 +33,19 @@ size_t map(void *key, size_t len, size_t mapSize) {
 
     idx %= mapSize;
     return idx;
+}
+
+void printList(list_t **head) {
+    list_t *current = *head;
+    if(!current) return;
+    printf("%s %s", current->key, current->next ? "-> " : "\n");
+    return printList(&current->next);
+}
+
+void printMap(map_t *hashMap) {
+    for(size_t j = 0; j <= hashMap->size; j++) {
+        printf("[%02zu]:\t", j);
+        if(hashMap->slots[j]) printList(&hashMap->slots[j]);
+        else printf("(empty)\n");
+    }
 }

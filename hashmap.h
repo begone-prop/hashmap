@@ -18,5 +18,7 @@ typedef struct map_t {
 
 static list_t *createNode(char *, char *);
 static size_t map(void *, size_t, size_t);
+static void printList(list_t **);
 map_t *createMap(size_t);
+void printMap(map_t *);
 #endif
