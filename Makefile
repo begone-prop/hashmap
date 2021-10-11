@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall
 
 CFILES=main.c hashmap.c
 OBJECTS=main.o hashmap.o

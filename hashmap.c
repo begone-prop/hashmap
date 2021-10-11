@@ -3,11 +3,35 @@
 #include <stdio.h>
 #include "hashmap.h"
 
+void insert(map_t *hashMap, list_t *node) {
+    size_t idx = map(node->key, sizeof(char *), hashMap->size);
+    list_t *current = hashMap->slots[idx];
+
+    for(; current; current = current->next) {
+        if(!strcmp(current->key, node->key)) {
+            free(current->data);
+            current->data = strdup(node->data);
+            free(node->key);
+            free(node->data);
+            free(node);
+            break;
+        }
+    }
+
+    if(!current) {
+        node->next = hashMap->slots[idx];
+        hashMap->slots[idx] = node;
+    }
+
+    hashMap->taken++;
+    hashMap->loadFactor = (float) hashMap->taken / hashMap->size;
+}
+
 map_t *createMap(size_t mapSize) {
     map_t *newMap = (map_t *) malloc(sizeof(map_t));
     newMap->slots = (list_t **) malloc(mapSize * sizeof(list_t *));
 
-    for(size_t i = 0; i <= mapSize; i++) {
+    for(size_t i = 0; i < mapSize; i++) {
         newMap->slots[i] = NULL;
     }
 
@@ -38,14 +62,14 @@ size_t map(void *key, size_t len, size_t mapSize) {
 void printList(list_t **head) {
     list_t *current = *head;
     if(!current) return;
-    printf("%s %s", current->key, current->next ? "-> " : "\n");
+    printf("(%s, %s) %s", current->key, current->data, current->next ? "-> " : "\n");
     return printList(&current->next);
 }
 
 void printMap(map_t *hashMap) {
-    for(size_t j = 0; j <= hashMap->size; j++) {
+    for(size_t j = 0; j < hashMap->size; j++) {
         printf("[%02zu]:\t", j);
         if(hashMap->slots[j]) printList(&hashMap->slots[j]);
-        else printf("(empty)\n");
+        else printf("null\n");
     }
 }
