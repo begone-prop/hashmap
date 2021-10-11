@@ -3,22 +3,20 @@
 #include <stdio.h>
 #include "hashmap.h"
 
-void insert(map_t *hashMap, list_t *node) {
-    size_t idx = map(node->key, sizeof(char *), hashMap->size);
+void insert(map_t *hashMap, char *key, char *data) {
+    size_t idx = map(key, sizeof(char *), hashMap->size);
+
     list_t *current = hashMap->slots[idx];
 
     for(; current; current = current->next) {
-        if(!strcmp(current->key, node->key)) {
-            free(current->data);
-            current->data = strdup(node->data);
-            free(node->key);
-            free(node->data);
-            free(node);
+        if(!strcmp(current->key, key)) {
+            current->data = strdup(data);
             break;
         }
     }
 
     if(!current) {
+        list_t *node = createNode(key, data);
         node->next = hashMap->slots[idx];
         hashMap->slots[idx] = node;
     }
@@ -49,11 +47,11 @@ list_t *createNode(char *key, char *data) {
     return node;
 }
 
-size_t map(void *key, size_t len, size_t mapSize) {
-    unsigned char *p = key;
+size_t map(char *key, size_t len, size_t mapSize) {
     size_t idx = 0x811c9dc5;
+
     for(size_t i = 0; i < len; i++)
-        idx = (idx ^ p[i]) * 0x01000193;
+        idx = (idx ^ key[i]) * 0x01000193;
 
     idx %= mapSize;
     return idx;
