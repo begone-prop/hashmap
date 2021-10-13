@@ -22,7 +22,7 @@ typedef struct map_t {
 
 size_t map(char *, size_t, size_t);
 list_t *createNode(char *, char *);
-void resize(map_t **);
+void grow(map_t **);
 void printList(list_t **);
 map_t *createMap(size_t);
 void printMap(map_t *);

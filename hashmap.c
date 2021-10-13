@@ -3,30 +3,42 @@
 #include <stdio.h>
 #include "hashmap.h"
 
-void resize(map_t **entry) {
-    map_t *hashmap = *entry;
-    size_t newSize = hashmap->size * 2;
+void grow(map_t **entry) {
+    map_t *oldMap = *entry;
+    size_t newSize = oldMap->size * 2;
     map_t *newMap = createMap(newSize);
 
-    for(size_t i = 0; i < hashmap->size; i++) {
-        newMap->slots[i] = hashmap->slots[i];
+    for(size_t i = 0; i < oldMap->size; i++) {
+        list_t *current = oldMap->slots[i];
+        while(current) {
+            size_t idx = map(current->key, strlen(current->key), newMap->size);
+            list_t *next = current->next;
+            current->next = newMap->slots[idx];
+            newMap->slots[idx] = current;
+            current = next;
+        }
+        oldMap->slots[i] = NULL;
     }
 
     newMap->size = newSize;
-    newMap->taken = hashmap->taken;
+    newMap->taken = oldMap->taken;
     newMap->load = (float) newMap->taken / newSize;
     *entry = newMap;
+    free(oldMap->slots);
+    free(oldMap);
 }
 
 void insert(map_t **entry, char *key, char *data) {
+    if((*entry)->load >= LOAD_THRESHOLD)
+        grow(entry);
+
     map_t *hashmap = *entry;
     size_t idx = map(key, sizeof(char *), hashmap->size);
     list_t *current = hashmap->slots[idx];
 
-    if(hashmap->load >= LOAD_THRESHOLD) resize(&hashmap);
-
     for(; current; current = current->next) {
         if(!strcmp(current->key, key)) {
+            free(current->data);
             current->data = strdup(data);
             return;
         }
@@ -75,7 +87,7 @@ void printList(list_t **head) {
     list_t *current = *head;
     if(!current) return;
     printf("(%s, %s) %s", current->key, current->data, current->next ? "-> " : "\n");
-    return printList(&current->next);
+    printList(&current->next);
 }
 
 void printMap(map_t *hashmap) {
