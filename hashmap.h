@@ -27,4 +27,6 @@ void printList(list_t **);
 map_t *createMap(size_t);
 void printMap(map_t *);
 void insert(map_t **, char *, char *);
+void freeList(list_t **);
+void deleteMap(map_t **);
 #endif

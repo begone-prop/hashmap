@@ -3,6 +3,28 @@
 #include <stdio.h>
 #include "hashmap.h"
 
+void deleteMap(map_t **entry) {
+    map_t *map = *entry;
+    for(size_t i = 0; i < map->size; i++) {
+        freeList(&map->slots[i]);
+    }
+
+    map->taken = 0;
+    map->size = 0;
+    map->load = 0;
+    free(map->slots);
+    free(map);
+}
+
+void freeList(list_t **head) {
+    if(!*head) return;
+    freeList(&((*head)->next));
+    free((*head)->key);
+    free((*head)->data);
+    free(*head);
+    *head = NULL;
+}
+
 void grow(map_t **entry) {
     map_t *oldMap = *entry;
     size_t newSize = oldMap->size * 2;
@@ -82,6 +104,7 @@ size_t map(char *key, size_t len, size_t mapSize) {
     idx %= mapSize;
     return idx;
 }
+
 
 void printList(list_t **head) {
     list_t *current = *head;
