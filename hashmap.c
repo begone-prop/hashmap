@@ -5,6 +5,18 @@
 
 static void freeList(list_t *);
 static list_t *createNode(char *, char *);
+static list_t *search(list_t *, char *);
+
+list_t *search(list_t *head, char *key) {
+    if(!head) return NULL;
+    if(!strcmp(head->key, key)) return head;
+    return search(head->next, key);
+}
+
+list_t *find(map_t hashmap, char *key) {
+    size_t idx = map(key, strlen(key), hashmap.size);
+    return search(hashmap.slots[idx], key);
+}
 
 map_t createMap(size_t mapSize) {
     map_t newMap;
@@ -53,10 +65,10 @@ void insert(map_t *entry, char *key, char *data) {
     }
 
     size_t idx = map(key, strlen(key), entry->size);
-    for(list_t *current = entry->slots[idx]; current; current = current->next) {
-        if(strcmp(current->key, key)) continue;
-        free(current->data);
-        current->data = strdup(data);
+    list_t *update = search(entry->slots[idx], key);
+    if(update) {
+        free(update->data);
+        update->data = strdup(data);
         return;
     }
 
