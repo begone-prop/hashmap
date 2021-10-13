@@ -17,16 +17,13 @@ typedef struct map_t {
     list_t **slots;
     size_t size;
     size_t taken;
-    float load;
 } map_t;
 
+map_t createMap(size_t);
 size_t map(char *, size_t, size_t);
-list_t *createNode(char *, char *);
-void grow(map_t **);
-void printList(list_t **);
-map_t *createMap(size_t);
-void printMap(map_t *);
-void insert(map_t **, char *, char *);
-void freeList(list_t **);
-void deleteMap(map_t **);
+void deleteMap(map_t *);
+void grow(map_t *);
+void insert(map_t *, char *, char *);
+void printList(list_t *);
+void printMap(map_t);
 #endif
