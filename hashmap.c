@@ -20,7 +20,8 @@ list_t *find(map_t hashmap, char *key) {
 
 map_t createMap(size_t mapSize) {
     map_t newMap;
-    list_t **heads = malloc(mapSize * sizeof(list_t)); newMap.slots = heads;
+    list_t **heads = malloc(mapSize * sizeof(list_t *));
+    newMap.slots = heads;
 
     for(size_t i = 0; i < mapSize; i++)
         newMap.slots[i] = NULL;
