@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall
+DEFS=-DMAX_SIZE=100
 
 CFILES=main.c hashmap.c
 OBJECTS=main.o hashmap.o
@@ -14,5 +15,9 @@ $(BINARY): $(OBJECTS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+data:
+	./misc/genData.sh > debug.c
+	$(CC) $(CFLAGS) $(DEFS) debug.c hashmap.c -o debug
+
 clean:
-	rm -rf $(BINARY) $(OBJECTS)
+	rm -rf $(BINARY) $(OBJECTS) debug*
