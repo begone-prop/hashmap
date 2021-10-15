@@ -7,6 +7,79 @@ static void freeList(list_t *);
 static list_t *createNode(char *, char *);
 static list_t *search(list_t *, char *);
 
+void resize(map_t *hashmap, float ammount) {
+    if(ammount < 0) return;
+    size_t newSize = hashmap->size * ammount;
+    map_t newMap = createMap(newSize);
+
+    for(size_t i = 0; i < hashmap->size; i++) {
+        list_t *current = hashmap->slots[i];
+        while(current) {
+            size_t idx = map(current->key, strlen(current->key), newMap.size);
+            list_t *next = current->next;
+            current->next = newMap.slots[idx];
+            newMap.slots[idx] = current;
+            current = next;
+        }
+    }
+
+    free(hashmap->slots);
+    hashmap->slots = newMap.slots;
+    hashmap->size = newSize;
+}
+
+void insert(map_t *entry, char *key, char *data) {
+    if((float) (entry->taken + 1) / entry->size >= GROW_THRESHOLD &&
+            entry->size * 2 <= MAX_SIZE) {
+        resize(entry, 2);
+    }
+
+    size_t idx = map(key, strlen(key), entry->size);
+    list_t *update = search(entry->slots[idx], key);
+    if(update) {
+        free(update->data);
+        update->data = strdup(data);
+        return;
+    }
+
+    list_t *node = createNode(key, data);
+    node->next = entry->slots[idx];
+    entry->slots[idx] = node;
+    entry->taken++;
+}
+
+void drop(map_t *hashmap, char *key) {
+    if((float) hashmap->taken / hashmap->size < SHRINK_THRESHOLD &&
+            hashmap->size >= MIN_SIZE) {
+        resize(hashmap, 0.5);
+    }
+
+    size_t idx = map(key, strlen(key), hashmap->size);
+    list_t *head = hashmap->slots[idx];
+
+    if(head && !strcmp(head->key, key)) {
+        list_t *next = head->next;
+        free(head->key);
+        free(head->data);
+        free(head);
+        hashmap->slots[idx] = next;
+        next = hashmap->slots[idx];
+        hashmap->taken--;
+    } else {
+        for(list_t *current = head; current; current = current->next) {
+            list_t *next = current->next;
+            if(next && !strcmp(next->key, key)) {
+                free(next->key);
+                free(next->data);
+                current->next = next->next;
+                free(next);
+                hashmap->taken--;
+                break;
+            }
+        }
+    }
+}
+
 list_t *search(list_t *head, char *key) {
     if(!head) return NULL;
     if(!strcmp(head->key, key)) return head;
@@ -37,46 +110,6 @@ void deleteMap(map_t *hashmap) {
 
     for(size_t i = 0; i < hashmap->size; i++) freeList(hashmap->slots[i]);
     free(hashmap->slots);
-}
-
-void grow(map_t *entry) {
-    size_t newSize = entry->size * 2;
-    map_t newMap = createMap(newSize);
-
-    for(size_t i = 0; i < entry->size; i++) {
-        list_t *current = entry->slots[i];
-        while(current) {
-            size_t idx = map(current->key, strlen(current->key), newMap.size);
-            list_t *next = current->next;
-            current->next = newMap.slots[idx];
-            newMap.slots[idx] = current;
-            current = next;
-        }
-        entry->slots[i] = NULL;
-    }
-
-    free(entry->slots);
-    entry->slots = newMap.slots;
-    entry->size = newSize;
-}
-
-void insert(map_t *entry, char *key, char *data) {
-    if((float) (entry->taken + 1) / entry->size >= LOAD_THRESHOLD) {
-        grow(entry);
-    }
-
-    size_t idx = map(key, strlen(key), entry->size);
-    list_t *update = search(entry->slots[idx], key);
-    if(update) {
-        free(update->data);
-        update->data = strdup(data);
-        return;
-    }
-
-    list_t *node = createNode(key, data);
-    node->next = entry->slots[idx];
-    entry->slots[idx] = node;
-    entry->taken++;
 }
 
 size_t map(char *key, size_t len, size_t mapSize) {

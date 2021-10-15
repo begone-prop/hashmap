@@ -4,14 +4,8 @@
 #include "hashmap.h"
 
 #ifndef MAP_SIZE
-#define MAP_SIZE 5
+#define MAP_SIZE  5
 #endif
-
-list_t *search(list_t *head, char *key) {
-    if(!head) return NULL;
-    if(!strcmp(head->key, key)) return head;
-    return search(head->next, key);
-}
 
 int main(int argc, char **argv) {
     map_t hashtable = createMap(MAP_SIZE);
@@ -35,11 +29,26 @@ int main(int argc, char **argv) {
     insert(&hashtable, "Key8", "eight");
     insert(&hashtable, "Key9", "nine");
 
-    list_t *data = find(hashtable, "Key7");
+    list_t *data = find(hashtable, "Key3");
     if(!data) printf("%p\n", data);
     else printf("%s\t%s\n", data->key, data->data);
+
+    list_t *node = find(hashtable, "nokey");
+    if(!node) printf("%p\n", node);
+    else printf("%s\t%s\n", node->key, node->data);
+
+    printMap(hashtable);
+    drop(&hashtable, "Key1");
+    drop(&hashtable, "Key2");
+    drop(&hashtable, "Key3");
+    drop(&hashtable, "Key4");
+    drop(&hashtable, "Key5");
+    drop(&hashtable, "Key6");
+    drop(&hashtable, "Key7");
+    drop(&hashtable, "Key8");
+    drop(&hashtable, "Key9");
     printMap(hashtable);
     deleteMap(&hashtable);
-    printMap(hashtable);
+    //printMap(hashtable);
     return 0;
 }
